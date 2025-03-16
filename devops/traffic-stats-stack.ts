@@ -16,7 +16,7 @@ import * as cloudfront from 'aws-cdk-lib/aws-cloudfront';
 import * as origins from 'aws-cdk-lib/aws-cloudfront-origins';
 import * as fs from 'fs';
 
-const DEVELOPMENT_ENV = true;
+const DEVELOPMENT_ENV = false;
 
 export class TrafficStatsStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
