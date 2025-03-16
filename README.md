@@ -38,6 +38,10 @@ Local dev uses cloud backend.
 
 Deployment is done using AWS CDK.
 
+Backdend and frontend are both deployed to the AWS cloud.
+
+See deployent results to get backend and frontend urls.
+
 First ensure that you have AWS CLI configured and rights to deploy.
 
 ```
