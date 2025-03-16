@@ -165,7 +165,7 @@ export class TrafficStatsStack extends cdk.Stack {
       websiteIndexDocument: 'index.html',
       publicReadAccess: true,
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ACLS,
-      removalPolicy: DEVELOPMENT_ENV ? cdk.RemovalPolicy.DESTROY : cdk.RemovalPolicy.RETAIN,
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
       autoDeleteObjects: true
     });
 
