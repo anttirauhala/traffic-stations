@@ -31,7 +31,9 @@ const App: React.FC = () => {
       <h1>Traffic Stats</h1>
       <StationSelector stations={stations} />
       <footer style={{ fontSize: 'small', textAlign: 'center', marginTop: '20px' }}>
-        Liikennetietojen lähde Fintraffic / <a href="https://digitraffic.fi">digitraffic.fi</a>, lisenssi <a href="https://creativecommons.org/licenses/by/4.0/">CC 4.0 BY</a>
+        <p>Liikennetietojen lähde Fintraffic / <a href="https://digitraffic.fi">digitraffic.fi</a>, lisenssi <a href="https://creativecommons.org/licenses/by/4.0/">CC 4.0 BY</a></p>
+        <p>Esitettävät tiedot on jalostettu Fintrafficin tiedoista laskemalla ja tietojen oikeelisuutta ei taata.</p>
+        <p>Kaikki oikeudet pidätetään. Tämä sivusto ei ole Fintrafficin virallinen sivusto.</p>
       </footer>
     </div>
   );
