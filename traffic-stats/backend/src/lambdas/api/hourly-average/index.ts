@@ -171,7 +171,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
       }
       return {
         hour,
-        trafficCount: data.trafficCount,
+        trafficCount: Math.round(data.trafficCount / data.dataPoints), // Divide by data points to get the average
         avgSpeed: Number((data.avgSpeed / data.dataPoints).toFixed(1))
       };
     });
