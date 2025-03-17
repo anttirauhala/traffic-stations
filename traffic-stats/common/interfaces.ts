@@ -5,6 +5,7 @@ export interface Station {
     lon: number;
     fullName?: string;
     description?: string;
+    collectionStatus?: undefined,
 }
 
 export interface SensorValue {

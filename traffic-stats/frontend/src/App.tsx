@@ -9,6 +9,9 @@ interface Station {
   name: string;
   lat: number;
   lon: number;
+  fullName?: string;
+  description?: string;
+  collectionStatus?: string;
 }
 
 const App: React.FC = () => {

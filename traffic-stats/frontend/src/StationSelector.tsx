@@ -57,6 +57,16 @@ interface HourlyAverage {
   sensorData?: SensorHourlyData[];
 }
 
+interface Station {
+  id: string;
+  name: string;
+  lat: number;
+  lon: number;
+  fullName?: string;
+  description?: string;
+  collectionStatus?: string;
+}
+
 interface StationSelectorProps {
   stations: Station[];
 }
@@ -325,8 +335,8 @@ const StationSelector: React.FC<StationSelectorProps> = ({ stations }) => {
             <p><strong>Municipality:</strong> {selectedStationData.municipality}</p>
             <p><strong>Direction 1 Municipality:</strong> {selectedStationData.direction1Municipality}</p>
             <p><strong>Direction 2 Municipality:</strong> {selectedStationData.direction2Municipality}</p>
-            <p><strong>Period:</strong> {hourlyAverage?.period.start} to {hourlyAverage?.period.end}
-          </p>
+            <p><strong>Period:</strong> {hourlyAverage?.period.start} to {hourlyAverage?.period.end}</p>
+            <p><strong>Collection Status:</strong> {selectedStationData.collectionStatus}</p>
           </div>
         </details>
       )}
@@ -471,7 +481,6 @@ const StationSelector: React.FC<StationSelectorProps> = ({ stations }) => {
 
 // Define styles as JavaScript object
 import { CSSProperties } from "react";
-import { Station } from "../../common/interfaces";
 
 const styles: { [key: string]: CSSProperties } = {
   stationSelector: {
@@ -501,7 +510,8 @@ const styles: { [key: string]: CSSProperties } = {
     textAlign: "center" as const,
     borderRadius: "4px",
     margin: "20px 0",
-    backgroundColor: "#f0f0f0",
+    backgroundColor: "white",
+    color: "black", // Ensure text is visible in dark mode
   },
   error: {
     padding: "20px",
@@ -512,7 +522,8 @@ const styles: { [key: string]: CSSProperties } = {
     color: "#c62828",
   },
   chartsContainer: {
-    backgroundColor: "#f9f9f9",
+    backgroundColor: "white",
+    color: "black", // Ensure text is visible in dark mode
     padding: "20px",
     borderRadius: "8px",
     boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
@@ -552,6 +563,8 @@ const styles: { [key: string]: CSSProperties } = {
   rawData: {
     marginTop: "30px",
     cursor: "pointer",
+    backgroundColor: "white",
+    color: "black", // Ensure text is visible in dark mode
   },
   rawDataSummary: {
     fontWeight: "bold",
@@ -560,7 +573,8 @@ const styles: { [key: string]: CSSProperties } = {
     borderRadius: "4px",
   },
   rawDataPre: {
-    backgroundColor: "#f5f5f5",
+    backgroundColor: "white",
+    color: "black", // Ensure text is visible in dark mode
     padding: "15px",
     overflow: "auto",
     maxHeight: "300px",
@@ -596,6 +610,7 @@ const styles: { [key: string]: CSSProperties } = {
     alignItems: "center" as const,
     padding: "10px 15px",
     backgroundColor: "white",
+    color: "black", // Ensure text is visible in dark mode
     borderWidth: "1px",
     borderStyle: "solid",
     borderColor: "#ccc",
@@ -624,6 +639,7 @@ const styles: { [key: string]: CSSProperties } = {
     left: 0,
     right: 0,
     backgroundColor: "white",
+    color: "black", // Ensure text is visible in dark mode
     borderWidth: "1px",
     borderStyle: "solid",
     borderColor: "#ddd",
@@ -636,6 +652,8 @@ const styles: { [key: string]: CSSProperties } = {
   dropdownOption: {
     padding: "12px 15px",
     cursor: "pointer",
+    backgroundColor: "white",
+    color: "black", // Ensure text is visible in dark mode
     borderBottomWidth: "1px",
     // borderBottomStyle: 'solid',
     borderBottomColor: "#f0f0f0",
@@ -646,11 +664,12 @@ const styles: { [key: string]: CSSProperties } = {
   },
   dropdownOptionSelected: {
     backgroundColor: "#f0f7ff",
+    color: "#0066cc", // Ensure text is visible in dark mode
     fontWeight: "bold" as const,
-    color: "#0066cc",
   },
   dropdownOptionHover: {
     backgroundColor: "#f6f9ff",
+    color: "black", // Ensure text is visible in dark mode
   },
   hiddenSelect: {
     position: "absolute" as const,
@@ -665,7 +684,8 @@ const styles: { [key: string]: CSSProperties } = {
   // Map styles
   mapDetails: {
     marginBottom: "20px",
-    backgroundColor: "#ffffff",
+    backgroundColor: "white",
+    color: "black", // Ensure text is visible in dark mode
     borderRadius: "8px",
     boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
     overflow: "hidden",
