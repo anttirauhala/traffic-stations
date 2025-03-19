@@ -1,7 +1,7 @@
 # traffic-stations
-Digitraffic LAM data collector in AWS cloud and frotend to show data
+Digitraffic LAM data collector in AWS cloud and frontend to show data.
 
-Project is imlemented using VS Code Copilot.
+Project is implemented using VS Code Copilot.
 
 All components are deployed using AWS CDK.
 
@@ -9,21 +9,21 @@ All components are deployed using AWS CDK.
 
 Backend is implemented as cloud-based.
 
-There is two lambda functions and SQS queue to collect data into DynamoDB database.
+There are two lambda functions and SQS queue to collect data into DynamoDB database.
 
-REST endpoints to fetch data from Dynamodb are also implemented as lambda functios. There is API gateway to serve REST endpoints.
+REST endpoints to fetch data from Dynamodb are also implemented as lambda functions. There is API gateway to serve REST endpoints.
 
-Collector lambda collects data from Digitraffic endpoint once an hour and sends data to the SQS queue.
+Collector lambda collects data from Digitraffic endpoint once per hour and sends data to the SQS queue.
 
 Processor lambda reads SQS queue and stores data into DynamoDB database table.
 
-API endpoints read data from the db, calculates endpoint data and returns data.
+API endpoints read data from the db, calculate endpoint data and return data.
 
 Digitraffic <-- collector --> SQS --> processor --> DynamoDB table
 
 **Frontend**
 
-Frontend is imlemented using React and project tool is Vite.
+Frontend is implemented using React and project tool is Vite.
 
 You can run frontend locally using commands
 
@@ -38,9 +38,9 @@ Local dev uses cloud backend.
 
 Deployment is done using AWS CDK.
 
-Backdend and frontend are both deployed to the AWS cloud.
+Backend and frontend are both deployed to the AWS cloud.
 
-See deployent results to get backend and frontend urls.
+See deployment results to get backend and frontend urls.
 
 First ensure that you have AWS CLI configured and rights to deploy.
 
