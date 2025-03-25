@@ -13,9 +13,9 @@ export interface SensorValue {
     stationId: number;
     name: string;
     shortName: string;
-    timeWindowStart: Date;
-    timeWindowEnd: Date;
-    measuredTime: Date;
+    timeWindowStart: string;
+    timeWindowEnd: string;
+    measuredTime: string;
     value: number;
     unit: string;
 }

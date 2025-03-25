@@ -7,6 +7,20 @@ const dynamoClient = new DynamoDBClient({ region: process.env.AWS_REGION });
 const docClient = DynamoDBDocumentClient.from(dynamoClient);
 
 /**
+ * Converts UTC time to Helsinki time and returns the hour (0-23)
+ */
+const getHelsinkiHour = (utcTimeString: string): number => {
+  // Create a date object from the UTC time string
+  const date = new Date(utcTimeString);
+  
+  // Convert to Helsinki time (EET/EEST)
+  const helsinkiTime = new Date(date.toLocaleString('en-US', { timeZone: 'Europe/Helsinki' }));
+  
+  // Return the hour in Helsinki time
+  return helsinkiTime.getHours();
+};
+
+/**
  * API handler for getting hourly average traffic data for a specific station
  * based on data from the last month
  * Endpoint: GET /traffic/station/{stationId}/hourly-average
@@ -82,7 +96,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
       
       // Use timeWindowStart if available, otherwise fall back to measuredTime
       const timeString = item.timeWindowStart || item.measuredTime;
-      const hour = new Date(timeString).getHours();
+      const hour = getHelsinkiHour(timeString);
       
       // Initialize structures if they don't exist
       if (!groupedByNameAndHour[item.name]) {
@@ -149,7 +163,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
     // Calculate traffic count averages by hour
     for (const item of trafficCountSensors) {
       const timeString = item.timeWindowStart || item.measuredTime;
-      const hour = new Date(timeString).getHours();
+      const hour = getHelsinkiHour(timeString);
       
       hourlyAverages[hour].trafficCount += item.value || 0;
       hourlyAverages[hour].dataPoints += 1;
@@ -158,7 +172,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
     // Calculate speed averages by hour
     for (const item of speedSensors) {
       const timeString = item.timeWindowStart || item.measuredTime;
-      const hour = new Date(timeString).getHours();
+      const hour = getHelsinkiHour(timeString);
       
       hourlyAverages[hour].avgSpeed += item.value || 0;
       // We don't increment dataPoints again since it's already counted
