@@ -110,6 +110,8 @@ export const handler: APIGatewayProxyHandler = async (event) => {
       groupedByNameAndHour[item.name][hour].count++;
     }
     
+    console.log('Grouped by name and hour');
+    
     // Convert grouped data to the response format
     const hourlyAveragesByName: { 
       name: string;
@@ -143,6 +145,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
         hourlyData
       });
     }
+    console.log('Converted grouped data to response format');
     
     // Calculate overall averages by hour (maintaining backward compatibility)
     const hourlyAverages = Array(24).fill(null).map(() => ({
@@ -168,6 +171,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
       hourlyAverages[hour].trafficCount += item.value || 0;
       hourlyAverages[hour].dataPoints += 1;
     }
+    console.log('Calculated traffic count averages by hour');
     
     // Calculate speed averages by hour
     for (const item of speedSensors) {
@@ -177,6 +181,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
       hourlyAverages[hour].avgSpeed += item.value || 0;
       // We don't increment dataPoints again since it's already counted
     }
+    console.log('Calculated speed averages by hour');
     
     // Calculate the final results
     const hourlyData = hourlyAverages.map((data, hour) => {
@@ -189,12 +194,14 @@ export const handler: APIGatewayProxyHandler = async (event) => {
         avgSpeed: Number((data.avgSpeed / data.dataPoints).toFixed(1))
       };
     });
+    console.log('Calculated final results');
     
     // Filter hourlyAveragesByName to include only stations which are included in trafficCountSensors or in speedSensors
     const filteredHourlyAveragesByName = hourlyAveragesByName.filter(sensor => 
       trafficCountSensors.some(tc => tc.name === sensor.name) || 
       speedSensors.some(ss => ss.name === sensor.name)
     );
+    console.log('Filtered hourly averages by name');
 
     // Build the enhanced response
     const response = {
