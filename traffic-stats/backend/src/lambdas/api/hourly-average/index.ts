@@ -235,7 +235,8 @@ export const handler: APIGatewayProxyHandler = async (event) => {
     const hourlyAverages = Array(24).fill(null).map(() => ({
       trafficCount: 0,
       avgSpeed: 0,
-      dataPoints: 0
+      trafficDataPoints: 0,    // Separate counter for traffic count data points
+      speedDataPoints: 0       // Separate counter for speed data points
     }));
     
     // Find traffic count and speed sensors
@@ -253,29 +254,50 @@ export const handler: APIGatewayProxyHandler = async (event) => {
       const hour = getHelsinkiHour(timeString);
       
       hourlyAverages[hour].trafficCount += item.value || 0;
-      hourlyAverages[hour].dataPoints += 1;
+      hourlyAverages[hour].trafficDataPoints += 1;
     }
     console.log('Calculated traffic count averages by hour');
     
     // Calculate speed averages by hour
+    console.log(`DEBUG: Processing ${speedSensors.length} speed sensors`);
+    let speedValueSum = 0;
+    let speedCount = 0;
+    
     for (const item of speedSensors) {
       const timeString = item.timeWindowStart || item.measuredTime;
       const hour = getHelsinkiHour(timeString);
       
       hourlyAverages[hour].avgSpeed += item.value || 0;
-      // We don't increment dataPoints again since it's already counted
+      hourlyAverages[hour].speedDataPoints += 1;
+      speedValueSum += item.value || 0;
+      speedCount++;
+      
+      // Log some sample speed values
+      if (speedCount <= 10) {
+        console.log(`DEBUG: Speed sensor sample ${speedCount}: ${item.name}, value: ${item.value} ${item.unit}, hour: ${hour}`);
+      }
     }
+    console.log(`DEBUG: Speed calculation summary - Total sensors: ${speedCount}, Average raw speed: ${speedCount > 0 ? (speedValueSum / speedCount).toFixed(1) : 0} km/h`);
     console.log('Calculated speed averages by hour');
     
     // Calculate the final results
+    console.log('DEBUG: Calculating final hourly averages...');
     const hourlyData = hourlyAverages.map((data, hour) => {
-      if (data.dataPoints === 0) {
-        return { hour, trafficCount: 0, avgSpeed: 0 };
+      // Calculate traffic count average
+      const trafficCount = data.trafficDataPoints === 0 ? 0 : Math.round(data.trafficCount / data.trafficDataPoints);
+      
+      // Calculate speed average - use separate speed data points
+      const avgSpeed = data.speedDataPoints === 0 ? 0 : Number((data.avgSpeed / data.speedDataPoints).toFixed(1));
+      
+      // Log some sample calculations
+      if (hour < 3 || data.avgSpeed > 0) {
+        console.log(`DEBUG: Hour ${hour}: traffic sum=${data.trafficCount.toFixed(1)}, traffic dataPoints=${data.trafficDataPoints}, speed sum=${data.avgSpeed.toFixed(1)}, speed dataPoints=${data.speedDataPoints}, final avg speed=${avgSpeed} km/h`);
       }
+      
       return {
         hour,
-        trafficCount: Math.round(data.trafficCount / data.dataPoints), // Divide by data points to get the average
-        avgSpeed: Number((data.avgSpeed / data.dataPoints).toFixed(1))
+        trafficCount,
+        avgSpeed
       };
     });
     console.log('Calculated final results');
