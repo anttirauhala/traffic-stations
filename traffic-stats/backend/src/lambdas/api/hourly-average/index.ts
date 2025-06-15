@@ -18,6 +18,35 @@ const docClient = DynamoDBDocumentClient.from(dynamoClient);
  * Uses fast manual calculation with proper DST handling and caching
  */
 const hourCache: { [timeString: string]: number } = {};
+const dstCache: { [dateString: string]: boolean } = {}; // Cache DST calculations per date
+
+const isDSTForDate = (year: number, month: number, day: number): boolean => {
+  const dateKey = `${year}-${month}-${day}`;
+  
+  if (dstCache[dateKey] !== undefined) {
+    return dstCache[dateKey];
+  }
+  
+  let isDST = false;
+  
+  if (month > 2 && month < 9) {
+    // April-September: always DST
+    isDST = true;
+  } else if (month === 2) {
+    // March: check if on or after last Sunday
+    const lastSunday = 31 - ((new Date(year, 2, 31).getDay() + 6) % 7);
+    isDST = day >= lastSunday;
+  } else if (month === 9) {
+    // October: check if before last Sunday
+    const lastSunday = 31 - ((new Date(year, 9, 31).getDay() + 6) % 7);
+    isDST = day < lastSunday;
+  }
+  // November-February: always standard time (isDST = false)
+  
+  dstCache[dateKey] = isDST;
+  return isDST;
+};
+
 const getHelsinkiHour = (utcTimeString: string): number => {
   // Check if we've already calculated this hour
   if (hourCache[utcTimeString] !== undefined) {
@@ -28,23 +57,12 @@ const getHelsinkiHour = (utcTimeString: string): number => {
   const date = new Date(utcTimeString);
   
   // Helsinki timezone: UTC+2 (EET) in winter, UTC+3 (EEST) in summer
-  // DST starts last Sunday in March, ends last Sunday in October
   const year = date.getUTCFullYear();
   const month = date.getUTCMonth(); // 0-11
   const day = date.getUTCDate();
   
-  // Simple DST check for Helsinki: March-October is generally summer time
-  // More precise: DST starts last Sunday in March, ends last Sunday in October
-  let isDST = false;
-  if (month > 2 && month < 9) { // April-September: definitely DST
-    isDST = true;
-  } else if (month === 2) { // March: check if after last Sunday
-    const lastSunday = 31 - ((new Date(year, 2, 31).getDay() + 6) % 7);
-    isDST = day >= lastSunday;
-  } else if (month === 9) { // October: check if before last Sunday
-    const lastSunday = 31 - ((new Date(year, 9, 31).getDay() + 6) % 7);
-    isDST = day < lastSunday;
-  }
+  // Use cached DST calculation
+  const isDST = isDSTForDate(year, month, day);
   
   // Add the Helsinki offset: +2 hours (EET) or +3 hours (EEST)
   const offsetHours = isDST ? 3 : 2;
