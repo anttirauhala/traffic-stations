@@ -46,7 +46,7 @@ export class TrafficStatsStack extends cdk.Stack {
 
     // Create Lambda function for collecting traffic data
     const collectorLambda = new lambdaNodejs.NodejsFunction(this, `TrafficCollectorLambda-${id}`, {
-      runtime: lambda.Runtime.NODEJS_18_X,
+      runtime: lambda.Runtime.NODEJS_20_X,
       entry: path.join(__dirname, '../traffic-stats/backend/src/lambdas/collector/index.ts'),
       handler: 'handler',
       timeout: cdk.Duration.seconds(60),
@@ -69,7 +69,7 @@ export class TrafficStatsStack extends cdk.Stack {
 
     // Create Lambda function for processing traffic data from SQS
     const processorLambda = new lambdaNodejs.NodejsFunction(this, `TrafficProcessorLambda-${id}`, {
-      runtime: lambda.Runtime.NODEJS_18_X,
+      runtime: lambda.Runtime.NODEJS_20_X,
       entry: path.join(__dirname, '../traffic-stats/backend/src/lambdas/processor/index.ts'),
       handler: 'handler',
       timeout: cdk.Duration.seconds(60),
@@ -97,7 +97,7 @@ export class TrafficStatsStack extends cdk.Stack {
 
     // Create Lambda functions for API endpoints
     const dailyDataLambda = new lambdaNodejs.NodejsFunction(this, `DailyDataLambda-${id}`, {
-      runtime: lambda.Runtime.NODEJS_18_X,
+      runtime: lambda.Runtime.NODEJS_20_X,
       entry: path.join(__dirname, '../traffic-stats/backend/src/lambdas/api/daily-data/index.ts'),
       handler: 'handler',
       timeout: cdk.Duration.seconds(30),
@@ -110,7 +110,7 @@ export class TrafficStatsStack extends cdk.Stack {
     });
 
     const hourlyAverageLambda = new lambdaNodejs.NodejsFunction(this, `HourlyAverageLambda-${id}`, {
-      runtime: lambda.Runtime.NODEJS_18_X,
+      runtime: lambda.Runtime.NODEJS_20_X,
       entry: path.join(__dirname, '../traffic-stats/backend/src/lambdas/api/hourly-average/index.ts'),
       handler: 'handler',
       timeout: cdk.Duration.seconds(30),
