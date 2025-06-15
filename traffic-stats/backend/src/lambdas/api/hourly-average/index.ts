@@ -15,7 +15,7 @@ const docClient = DynamoDBDocumentClient.from(dynamoClient);
 
 /**
  * Converts UTC time to Helsinki time and returns the hour (0-23)
- * Uses caching to improve performance
+ * Uses fast manual calculation with proper DST handling and caching
  */
 const hourCache: { [timeString: string]: number } = {};
 const getHelsinkiHour = (utcTimeString: string): number => {
@@ -27,21 +27,33 @@ const getHelsinkiHour = (utcTimeString: string): number => {
   // Create a date object from the UTC time string
   const date = new Date(utcTimeString);
   
-  // Convert to Helsinki time (EET/EEST) - UTC+2/UTC+3
-  // This is much faster than using toLocaleString with timezone
-  const helsinkiOffset = date.getTimezoneOffset() + (date.isDST() ? 180 : 120);
-  const helsinkiTime = new Date(date.getTime() + helsinkiOffset * 60000);
+  // Helsinki timezone: UTC+2 (EET) in winter, UTC+3 (EEST) in summer
+  // DST starts last Sunday in March, ends last Sunday in October
+  const year = date.getUTCFullYear();
+  const month = date.getUTCMonth(); // 0-11
+  const day = date.getUTCDate();
+  
+  // Simple DST check for Helsinki: March-October is generally summer time
+  // More precise: DST starts last Sunday in March, ends last Sunday in October
+  let isDST = false;
+  if (month > 2 && month < 9) { // April-September: definitely DST
+    isDST = true;
+  } else if (month === 2) { // March: check if after last Sunday
+    const lastSunday = 31 - ((new Date(year, 2, 31).getDay() + 6) % 7);
+    isDST = day >= lastSunday;
+  } else if (month === 9) { // October: check if before last Sunday
+    const lastSunday = 31 - ((new Date(year, 9, 31).getDay() + 6) % 7);
+    isDST = day < lastSunday;
+  }
+  
+  // Add the Helsinki offset: +2 hours (EET) or +3 hours (EEST)
+  const offsetHours = isDST ? 3 : 2;
+  const helsinkiTime = new Date(date.getTime() + offsetHours * 60 * 60 * 1000);
   
   // Store in cache and return the hour
-  hourCache[utcTimeString] = helsinkiTime.getHours();
-  return hourCache[utcTimeString];
-};
-
-// Helper function to determine if a date is in DST (Daylight Saving Time)
-Date.prototype.isDST = function() {
-  const jan = new Date(this.getFullYear(), 0, 1);
-  const jul = new Date(this.getFullYear(), 6, 1);
-  return this.getTimezoneOffset() < Math.max(jan.getTimezoneOffset(), jul.getTimezoneOffset());
+  const hour = helsinkiTime.getUTCHours();
+  hourCache[utcTimeString] = hour;
+  return hour;
 };
 
 /**
