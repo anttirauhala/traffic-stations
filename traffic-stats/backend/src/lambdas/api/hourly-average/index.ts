@@ -51,6 +51,10 @@ Date.prototype.isDST = function() {
  */
 export const handler: APIGatewayProxyHandler = async (event) => {
   try {
+    // DEBUG-LOG-BEGIN: Remove these logs when everything is working
+    console.log('DEBUG: Incoming event:', JSON.stringify(event, null, 2));
+    console.log('DEBUG: Environment variables:', JSON.stringify(process.env, null, 2));
+    // DEBUG-LOG-END
     // Enable CORS
     const headers = {
       'Access-Control-Allow-Origin': '*',
@@ -94,22 +98,39 @@ export const handler: APIGatewayProxyHandler = async (event) => {
     const endDate = today.toISOString().split('T')[0];
     
     // Query DynamoDB for all records for this station within the last month
-    // Using measuredTime instead of timeWindowStart to match the table's sort key
-    const result = await docClient.send(new QueryCommand({
-      TableName: tableName,
-      KeyConditionExpression: 'stationId = :stationId AND begins_with(compositeKey, :compositeKeyPrefix)',
-      FilterExpression: 'measuredTime BETWEEN :startDate AND :endDate',
-      ExpressionAttributeValues: {
-        ':stationId': parseInt(stationId, 10), // Convert to number to match the table schema
-        ':compositeKeyPrefix': `${stationId}#`, // Use stationId as the prefix for compositeKey
-        ':startDate': new Date(startDate).toISOString(),
-        ':endDate': new Date(endDate + 'T23:59:59.999Z').toISOString() // Include the entire end date
+    // Using date range in compositeKey for efficient querying at the key level
+    // DEBUG-LOG-BEGIN: Remove these logs and pagination logic when everything is working
+    let items: SensorValue[] = [];
+    let lastEvaluatedKey = undefined;
+    let page = 0;
+    
+    // Use date range in KeyConditionExpression for more efficient querying
+    const startDateKey = `${stationId}#${new Date(startDate).toISOString()}`;
+    const endDateKey = `${stationId}#${new Date(endDate + 'T23:59:59.999Z').toISOString()}`;
+    
+    do {
+      page++;
+      const result = await docClient.send(new QueryCommand({
+        TableName: tableName,
+        KeyConditionExpression: 'stationId = :stationId AND compositeKey BETWEEN :startKey AND :endKey',
+        ExpressionAttributeValues: {
+          ':stationId': parseInt(stationId, 10),
+          ':startKey': startDateKey,
+          ':endKey': endDateKey
+        },
+        ExclusiveStartKey: lastEvaluatedKey
+      }));
+      console.log(`DEBUG: Query page ${page}, items:`, result.Items?.length, 'LastEvaluatedKey:', result.LastEvaluatedKey);
+      console.log(`DEBUG: Date range - Start: ${startDateKey}, End: ${endDateKey}`);
+      if (result.Items && result.Items.length > 0) {
+        console.log(`DEBUG: First item compositeKey:`, result.Items[0].compositeKey);
+        console.log(`DEBUG: Last item compositeKey:`, result.Items[result.Items.length - 1].compositeKey);
       }
-    }));
-
-    console.log('Query result items:', result.Items);
-
-    const items: SensorValue[] = result.Items as SensorValue[] || [];
+      if (result.Items) items = items.concat(result.Items as SensorValue[]);
+      lastEvaluatedKey = result.LastEvaluatedKey;
+    } while (lastEvaluatedKey);
+    console.log('DEBUG: Total items fetched:', items.length);
+    // DEBUG-LOG-END
     console.log(`Found ${items.length} records for station ${stationId}`);
     
     // Group by sensor name and hour
