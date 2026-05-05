@@ -1,10 +1,9 @@
-import axios from 'axios';
 import { Station } from './interfaces';
 
 export const getTampereStations = async (): Promise<Station[]> => {
   // Fetch basic station data
-  const stationsResponse = await axios.get('https://tie.digitraffic.fi/api/tms/v1/stations');
-  const stations: Station[] = stationsResponse.data.features.map((feature: any) => ({
+  const stationsResponse = await fetch('https://tie.digitraffic.fi/api/tms/v1/stations').then(r => r.json()) as any;
+  const stations: Station[] = stationsResponse.features.map((feature: any) => ({
     id: feature.properties.id,
     name: feature.properties.name,
     lat: feature.geometry.coordinates[1],
@@ -29,7 +28,7 @@ export const getTampereStations = async (): Promise<Station[]> => {
     let datex2Response;
 
     try {
-      datex2Response = await axios.get('https://tie.digitraffic.fi/api/tms/v1/stations/datex2');
+      datex2Response = await fetch('https://tie.digitraffic.fi/api/tms/v1/stations/datex2').then(r => r.json()) as any;
       console.log('DATEX2 data received');
     } catch (error) {
       console.error('Failed to fetch DATEX2 data:', error);
@@ -37,13 +36,13 @@ export const getTampereStations = async (): Promise<Station[]> => {
     }
 
     // Verify that measurementSiteTable exists in the response
-    if (!datex2Response?.data?.measurementSiteTable?.length ||
-      !datex2Response.data.measurementSiteTable[0]?.measurementSite?.length) {
+    if (!datex2Response?.measurementSiteTable?.length ||
+      !datex2Response.measurementSiteTable[0]?.measurementSite?.length) {
       console.error('Invalid DATEX2 response structure');
       return tampereStations;
     }
 
-    const measurementSites = datex2Response.data.measurementSiteTable[0].measurementSite;
+    const measurementSites = datex2Response.measurementSiteTable[0].measurementSite;
     console.log(`Found ${measurementSites.length} measurement sites in DATEX2 data`);
 
     // Create a simple map for lookup with string IDs
