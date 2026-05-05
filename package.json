@@ -30,7 +30,7 @@
     "@types/aws-lambda": "^8.10.147",
     "aws-cdk-lib": "^2.173.3",
     "aws-sdk": "^2.1692.0",
-    "axios": "^1.8.3",
+    "axios": "^1.16.0",
     "constructs": "^10.4.2"
   }
 }
