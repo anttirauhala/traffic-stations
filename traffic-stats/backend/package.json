@@ -9,6 +9,9 @@
   "author": "",
   "license": "ISC",
   "description": "",
+  "engines": {
+    "node": ">=24.22.1"
+  },
   "dependencies": {
     "@types/aws-lambda": "^8.10.147",
     "aws-sdk": "^2.1692.0",

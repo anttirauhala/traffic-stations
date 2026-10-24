@@ -5,6 +5,31 @@ Project is implemented using VS Code Copilot.
 
 All components are deployed using AWS CDK.
 
+## Prerequisites
+
+Node.js **24.22.1 or newer** is required (pinned in `.nvmrc` and `engines` in the package.json files).
+24.22.1 is the first Node.js 24 release patched for the Brotli decoder remote code execution
+vulnerability CVE-2026-111497 ("Node2Shell"), so older Node.js versions must not be used.
+
+```
+nvm use
+```
+
+The Lambda functions are deployed with the `NODEJS_24_X` runtime.
+
+AWS patches the managed `nodejs24.x` runtime on its own schedule, so the runtime version identifier
+alone does not tell which Node.js patch level is in use. The collector Lambda logs
+`NODE_VERSION <version>` on every hourly run, so the actual Node.js version can be verified from
+CloudWatch Logs (this is the method AWS documents for Node.js runtimes):
+
+```
+npm run check:runtime
+```
+
+The script exits with `0` when the deployed runtime is at least the version required for
+CVE-2026-111497 and with `1` when it is not yet patched. AWS updates the managed runtime in place,
+so no redeploy is needed - only the check needs to be repeated.
+
 **Backend**
 
 Backend is implemented as cloud-based.
@@ -43,6 +68,9 @@ Backend and frontend are both deployed to the AWS cloud.
 See deployment results to get backend and frontend urls.
 
 First ensure that you have AWS CLI configured and rights to deploy.
+
+The Lambda functions are bundled with esbuild. Either have Docker available, or install esbuild
+as a dev dependency (`npm install --save-dev esbuild`) to bundle locally without Docker.
 
 ```
 cdk synth

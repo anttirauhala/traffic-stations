@@ -12,6 +12,8 @@ const sqsClient = new SQSClient({ region: process.env.AWS_REGION });
  */
 export const handler: Handler = async (event) => {
   try {
+    // Log the Node.js version of the Lambda runtime so the patch level can be verified from CloudWatch logs
+    console.log('NODE_VERSION', process.version);
     console.log('Starting to fetch traffic data from Digitraffic');
     
     // Fetch stations from Digitraffic API

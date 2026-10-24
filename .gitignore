@@ -1,0 +1,11 @@
+# Node
+node_modules/
+npm-debug.log*
+
+# CDK
+cdk.out/
+cdk.context.json
+
+# Build output
+dist/
+traffic-stats/frontend/dist/

@@ -1,5 +1,5 @@
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
-import { DynamoDBDocumentClient, QueryCommand } from '@aws-sdk/lib-dynamodb';
+import { DynamoDBDocumentClient, QueryCommand, QueryCommandInput } from '@aws-sdk/lib-dynamodb';
 import { APIGatewayProxyHandler } from 'aws-lambda';
 import { SensorValue } from '../../../../../common/interfaces';
 
@@ -140,7 +140,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
     
     do {
       page++;
-      const result = await docClient.send(new QueryCommand({
+      const queryParams: QueryCommandInput = {
         TableName: tableName,
         KeyConditionExpression: 'stationId = :stationId AND compositeKey BETWEEN :startKey AND :endKey',
         ExpressionAttributeValues: {
@@ -149,7 +149,8 @@ export const handler: APIGatewayProxyHandler = async (event) => {
           ':endKey': endDateKey
         },
         ExclusiveStartKey: lastEvaluatedKey
-      }));
+      };
+      const result = await docClient.send(new QueryCommand(queryParams));
       console.log(`DEBUG: Query page ${page}, items:`, result.Items?.length, 'LastEvaluatedKey:', result.LastEvaluatedKey);
       console.log(`DEBUG: Date range - Start: ${startDateKey}, End: ${endDateKey}`);
       if (result.Items && result.Items.length > 0) {
